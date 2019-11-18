@@ -95,6 +95,8 @@ rho_c = args.rho_c/Density
 
 # load eos file
 eos_name = 'FPS_PP_HnG.dat'
+#eos_name = 'FPS_GPP.dat'
+
 #eos_name = 'EOS-RNS1/FPS_PP.dat'
 N_eos = int(open(eos_name).readline().rstrip())
 
@@ -224,7 +226,7 @@ for i in range(idxlast-3,idxlast+1):
 h_interp = PchipInterpolator(r_data, h_data)
 
 # find the root using Brent's method
-Radius = optimize.brentq( h_interp, r_data[0], r_data[3]+3*dr, xtol=1e-16 )
+#Radius = optimize.brentq( h_interp, r_data[0], r_data[3]+3*dr, xtol=1e-16 )
 
 #display(Radius)
 
@@ -244,9 +246,11 @@ def hHerm (r):
 
 
 
-Radius = optimize.brentq( hHerm, r_data[0], r_data[3]+3*dr, xtol=1e-16 )
+#Radius = optimize.brentq( hHerm, r_data[0], r_data[3]+3*dr, xtol=1e-16 )
 #display(Radius)
 
+# temporarily accept R_last as the radius
+Radius = R_last
 
 # Correct mass by adding last missing piece by Simpson's rule (finding an intemediate point by pchip interpolation):
 
@@ -255,7 +259,10 @@ dmdr_interp_pchip = PchipInterpolator(r_data, dmdr_data)
 dmdr_midpoint = dmdr_interp_pchip((R_last+Radius)/2)
 Dmass_simps = (1.0/3.0)*(Radius-R_last)/2*(dmdr_interp_pchip(R_last)+4.0*dmdr_midpoint+dmdr_interp_pchip(Radius))
 
-Mass = Mass_last + Dmass_simps
+#Mass = Mass_last + Dmass_simps
+
+# temporarily accept Mass_last as the mass
+Mass = Mass_last 
 
 #display(Mass)
 
@@ -337,17 +344,17 @@ M_reldiff = (Mass-M_alt)/Mass
 
 N_gridpoints = idxlast+1
 
-print('Number of grid points =', N_gridpoints)
-print('rho_c =', rho_c)
-print('epsilon_c =', eps_c)
-print('P_c =', P_c)
-print('dr =', dr)
-print('Radius of last grid point =', R_last)
-print('Extrapolated Radius at zero pressure =', '%.16f'% Radius)
-print('Baryon Mass =', M0)
-print('Gravitational Mass =', '%.16f'% Mass)
-print('Alternative Mass =', M_alt)
-print('Rel. diff. in Mass =', M_reldiff)
+# print('Number of grid points =', N_gridpoints)
+# print('rho_c =', rho_c)
+# print('epsilon_c =', eps_c)
+# print('P_c =', P_c)
+# print('dr =', dr)
+# print('Radius of last grid point =', R_last)
+# print('Extrapolated Radius at zero pressure =', '%.16f'% Radius)
+# print('Baryon Mass =', M0)
+# print('Gravitational Mass =', '%.16f'% Mass)
+# print('Alternative Mass =', M_alt)
+# print('Rel. diff. in Mass =', M_reldiff)
 
 
  
@@ -375,6 +382,12 @@ dr_CGS = dr*Length
 # print('Alternative Mass =', M_alt*Msun)
 # print('Rel. diff. in Mass =', M_reldiff)
 
+print('Number of grid points =', N_gridpoints)
+print('rho_c =', rho_c*Density)
+print('epsilon_c/c^2 =', eps_c*Density)
+print('Radius of last grid point (km) =', R_last*Length/1e5)
+print('Baryon Mass (Msun) =', M0)
+print('Gravitational Mass (Msun) =', Mass)
 
 values_CGS = np.zeros((idxlast+1, 10)) 
 
